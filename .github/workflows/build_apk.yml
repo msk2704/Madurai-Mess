@@ -1,56 +1,61 @@
-name: Build APK
+name: Android Build with Buildozer
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Java
-      uses: actions/setup-java@v2
-      with:
-        distribution: 'zulu'  # or 'temurin', 'corretto', etc.
-        java-version: '11'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'  # Python 3.10 works best with current Buildozer
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y python3-pip python3-dev python3-setuptools git
-        sudo apt-get install -y libncurses5-dev libffi-dev libssl-dev
-        sudo apt-get install -y openjdk-11-jdk  # Additional Java install for AIDL
-        sudo apt-get install -y android-sdk android-sdk-platform-tools
-        pip install virtualenv kivy buildozer cython python-for-android
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+              python3-pip \
+              openjdk-17-jdk \
+              git \
+              zip \
+              unzip \
+              zlib1g-dev \
+              ccache \
+              libncurses5 \
+              libncursesw5
 
-        # Set Android SDK path (may need adjustment based on your setup)
-        echo "ANDROID_SDK_ROOT=/usr/lib/android-sdk" >> $GITHUB_ENV
+      - name: Install Buildozer and tools
+        run: |
+          pip install --upgrade pip wheel virtualenv
+          pip install buildozer
+          buildozer init
+          buildozer android update
 
-    - name: Check for buildozer.spec
-      id: check_spec
-      run: |
-        if [ -f "buildozer.spec" ]; then
-          echo "exists=true" >> $GITHUB_OUTPUT
-        else
-          echo "exists=false" >> $GITHUB_OUTPUT
-        fi
+      - name: Create required directories
+        run: |
+          mkdir -p $HOME/.buildozer
+          mkdir -p .buildozer/android/platform/python-for-android
+          mkdir -p .buildozer/android/platform/build-arm64-v8a
 
-    - name: Initialize Buildozer (if needed)
-      if: steps.check_spec.outputs.exists == 'false'
-      run: |
-        buildozer init
+      - name: Run Buildozer clean
+        run: |
+          buildozer android clean
 
+      - name: Build APK
+        run: |
+          buildozer -v android debug
 
-    - name: Build APK
-      run: |
-        buildozer android clean
-        buildozer -v android debug
-
-    
-    - name: List buildozer directory
-      run: ls -la ~/.buildozer
+      - name: Upload APK artifact
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: madurai-mess-apk
+          path: bin/*.apk
