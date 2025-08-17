@@ -2,12 +2,15 @@ name: Build APK
 
 on:
   push:
-    branches: [ main ]   # Runs on push to main branch
-  workflow_dispatch:     # Allows manual trigger
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_HOME: ${{ github.workspace }}/Android
+      PATH: ${{ github.workspace }}/Android/cmdline-tools/latest/bin:${{ github.workspace }}/Android/platform-tools:$PATH
 
     steps:
     - name: Checkout repo
@@ -26,17 +29,31 @@ jobs:
         libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev \
         unzip wget openjdk-11-jdk
 
+    - name: Cache Buildozer and Python packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/pip
+          ~/.buildozer
+        key: ${{ runner.os }}-buildozer-${{ hashFiles('**/requirements.txt') }}
+
+    - name: Cache Android SDK
+      uses: actions/cache@v3
+      with:
+        path: ${{ github.workspace }}/Android
+        key: ${{ runner.os }}-android-sdk
+
     - name: Install Android SDK and Build Tools
       run: |
-        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
-        mkdir -p $HOME/Android/cmdline-tools
-        unzip cmdline-tools.zip -d $HOME/Android/cmdline-tools
-        mkdir -p $HOME/Android/cmdline-tools/latest
-        mv $HOME/Android/cmdline-tools/cmdline-tools/* $HOME/Android/cmdline-tools/latest/
-        export ANDROID_HOME=$HOME/Android
-        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
-        yes | sdkmanager --licenses
-        sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
+        if [ ! -d "$ANDROID_HOME/cmdline-tools/latest" ]; then
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+          unzip cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
+          mkdir -p $ANDROID_HOME/cmdline-tools/latest
+          mv $ANDROID_HOME/cmdline-tools/cmdline-tools/* $ANDROID_HOME/cmdline-tools/latest/
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
+        fi
 
     - name: Install Buildozer
       run: |
