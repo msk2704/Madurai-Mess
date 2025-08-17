@@ -1,4 +1,4 @@
-name: Build APK
+name: Build APK in Docker
 
 on:
   push:
@@ -7,26 +7,28 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04   # Explicit runner version
+    runs-on: ubuntu-22.04
+    container:
+      image: ubuntu:22.04  # Clean Ubuntu container with tar installed below
     env:
       ANDROID_HOME: ${{ github.workspace }}/Android
       PATH: ${{ github.workspace }}/Android/cmdline-tools/latest/bin:${{ github.workspace }}/Android/platform-tools:$PATH
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0  # Full Git clone to avoid tar
-        clean: true     # Remove any leftover files
-        lfs: false
-
     - name: Install system dependencies
       run: |
-        sudo apt update
-        sudo apt install -y tar build-essential git python3-pip python3-dev ffmpeg \
+        apt update
+        apt install -y tar build-essential git python3-pip python3-dev ffmpeg \
         libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
         libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev \
         unzip wget openjdk-11-jdk
+
+    - name: Checkout repo
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        clean: true
+        lfs: false
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -49,15 +51,13 @@ jobs:
 
     - name: Install Android SDK and Build Tools
       run: |
-        if [ ! -d "$ANDROID_HOME/cmdline-tools/latest" ]; then
-          mkdir -p $ANDROID_HOME/cmdline-tools
-          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
-          unzip cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
-          mkdir -p $ANDROID_HOME/cmdline-tools/latest
-          mv $ANDROID_HOME/cmdline-tools/cmdline-tools/* $ANDROID_HOME/cmdline-tools/latest/
-          yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
-        fi
+        mkdir -p $ANDROID_HOME/cmdline-tools
+        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+        unzip cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
+        mkdir -p $ANDROID_HOME/cmdline-tools/latest
+        mv $ANDROID_HOME/cmdline-tools/cmdline-tools/* $ANDROID_HOME/cmdline-tools/latest/
+        yes | sdkmanager --licenses
+        sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
 
     - name: Install Buildozer
       run: pip install --upgrade cython buildozer
