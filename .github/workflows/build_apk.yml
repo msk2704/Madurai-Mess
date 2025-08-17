@@ -14,11 +14,7 @@ jobs:
       PATH: ${{ github.workspace }}/Android/Sdk/cmdline-tools/latest/bin:${{ github.workspace }}/Android/Sdk/platform-tools:${{ github.workspace }}/Android/Sdk/build-tools/31.0.0:$PATH
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # full clone
-
+      
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
