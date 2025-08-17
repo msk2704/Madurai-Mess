@@ -45,6 +45,9 @@ jobs:
       run: |
         buildozer init
 
+    - name: List buildozer directory
+      run: ls -la ~/.buildozer
+
     - name: Build APK
       run: |
         buildozer android clean
