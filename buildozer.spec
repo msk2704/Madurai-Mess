@@ -1,50 +1,54 @@
 [app]
-# (str) Title of your application
+
+# Application information
 title = Madurai Mess
-
-# (str) Package name
 package.name = madurai_mess
-
-# (str) Package domain (reverse domain notation)
 package.domain = org.madurai
+version = 0.1.0  # Using semantic versioning
 
-# (str) Source code directory
+# Source configuration
 source.dir = .
+source.include_exts = py,png,jpg,kv,atlas,json,txt,ttf
 
-# (list) File extensions to include
-source.include_exts = py,png,jpg,kv,atlas
+# Additional directories to include
+source.include_dirs = assets,data
 
-# (str) Application version
-version = 0.69
-
-# (str) Application orientation (portrait/landscape)
+# Orientation and display
 orientation = portrait
-
-# (int) Fullscreen mode (0 = windowed, 1 = fullscreen)
 fullscreen = 0
+resizable = 1  # Allow window resizing on desktop
 
-# App icon and presplash
-icon.filename = assets/madurai_logo.png
-presplash.filename = assets/madurai_logo.png
-
-# (list) Python requirements
-requirements = python3,kivy
-
-# Limit to one architecture for faster builds
+# Graphics settings
+requirements = python3,kivy==2.1.0,pillow,requests
 android.archs = arm64-v8a
 
-# (str) Android SDK version to use
-android.sdk = 30  # or the version you are targeting
-
-# Android API settings
+# Android SDK configuration
+android.sdk = 30
 android.api = 31
 android.minapi = 21
 android.ndk = 25b
 android.ndk_api = 21
-android.build_tools_version = 30.0.3 
+android.build_tools_version = 32.0.0
 
-# Logging level (0=debug, 1=info, 2=warning, 3=error)
-log_level = 2
+# App assets
+icon.filename = %(source.dir)s/assets/icon.png
+presplash.filename = %(source.dir)s/assets/presplash.png
+presplash.color = #FFFFFF  # Neutral white background
 
-# (Optional) Uncomment if build issues arise
+# Permissions (add if needed)
+# android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE
+
+# Build optimization
+android.no_main_fragment = 1  # Optional: Disable main fragment for some optimizations
+
+# Debugging
+log_level = 1  # info level logging
+log_filter = *:I
+
+# Uncomment if you encounter build issues:
 # p4a.branch = master
+# p4a.local_recipes = ./p4a-recipes
+# android.accept_sdk_license = True
+
+# Packaging options
+# android.aab = 1  # Uncomment to build Android App Bundle
