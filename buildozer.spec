@@ -33,11 +33,15 @@ requirements = python3,kivy
 # Limit to one architecture for faster builds
 android.archs = arm64-v8a
 
+# (str) Android SDK version to use
+android.sdk = 30  # or the version you are targeting
+
 # Android API settings
 android.api = 31
 android.minapi = 21
 android.ndk = 25b
 android.ndk_api = 21
+android.build_tools_version = 30.0.3 
 
 # Logging level (0=debug, 1=info, 2=warning, 3=error)
 log_level = 2
