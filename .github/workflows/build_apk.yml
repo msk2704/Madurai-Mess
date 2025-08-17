@@ -16,15 +16,15 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v3
       with:
-        fetch-depth: 0  # Forces full clone instead of archive extraction
+        fetch-depth: 0  # Force full Git clone to avoid tar archive extraction
 
     - name: Install system dependencies
       run: |
         sudo apt update
-        sudo apt install -y build-essential git python3-pip python3-dev ffmpeg \
+        sudo apt install -y tar build-essential git python3-pip python3-dev ffmpeg \
         libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
         libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev \
-        unzip wget openjdk-11-jdk tar
+        unzip wget openjdk-11-jdk
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -58,12 +58,10 @@ jobs:
         fi
 
     - name: Install Buildozer
-      run: |
-        pip install --upgrade cython buildozer
+      run: pip install --upgrade cython buildozer
 
     - name: Build APK
-      run: |
-        buildozer -v android debug
+      run: buildozer -v android debug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
