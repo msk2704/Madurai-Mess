@@ -1,4 +1,4 @@
-name: Build APK in Docker
+name: Build APK
 
 on:
   push:
@@ -8,8 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
-    container:
-      image: ghcr.io/catthehacker/ubuntu:full-22.04
     env:
       ANDROID_HOME: ${{ github.workspace }}/Android
       PATH: ${{ github.workspace }}/Android/cmdline-tools/latest/bin:${{ github.workspace }}/Android/platform-tools:$PATH
@@ -24,8 +22,8 @@ jobs:
 
     - name: Install system dependencies
       run: |
-        apt update
-        apt install -y build-essential git python3-pip python3-dev ffmpeg \
+        sudo apt update
+        sudo apt install -y tar build-essential git python3-pip python3-dev ffmpeg \
         libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
         libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev \
         unzip wget openjdk-11-jdk
