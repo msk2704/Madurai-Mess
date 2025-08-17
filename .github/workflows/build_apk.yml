@@ -1,70 +1,25 @@
-name: Build APK
+name: Run test
 
 on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+  pull_request:
+    branches: [main]
 
 jobs:
-  build:
-    runs-on: ubuntu-22.04
-    env:
-      ANDROID_HOME: ${{ github.workspace }}/Android
-      PATH: ${{ github.workspace }}/Android/cmdline-tools/latest/bin:${{ github.workspace }}/Android/platform-tools:$PATH
+  test:
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-        clean: true
-        lfs: false
+      - uses: actions/checkout@v4
 
-    - name: Install system dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y tar build-essential git python3-pip python3-dev ffmpeg \
-        libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
-        libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev \
-        unzip wget openjdk-11-jdk
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+          cache: 'gradle'
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
+      - name: Grant execute permissions for gradlew
+        run: chmod +x gradlew
 
-    - name: Cache Buildozer and Python packages
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cache/pip
-          ~/.buildozer
-        key: ${{ runner.os }}-buildozer-${{ hashFiles('**/requirements.txt') }}
-
-    - name: Cache Android SDK
-      uses: actions/cache@v3
-      with:
-        path: ${{ github.workspace }}/Android
-        key: ${{ runner.os }}-android-sdk
-
-    - name: Install Android SDK and Build Tools
-      run: |
-        mkdir -p $ANDROID_HOME/cmdline-tools
-        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
-        unzip cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
-        mkdir -p $ANDROID_HOME/cmdline-tools/latest
-        mv $ANDROID_HOME/cmdline-tools/cmdline-tools/* $ANDROID_HOME/cmdline-tools/latest/
-        yes | sdkmanager --licenses
-        sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
-
-    - name: Install Buildozer
-      run: pip install --upgrade cython buildozer
-
-    - name: Build APK
-      run: buildozer -v android debug
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: MaduraiMess-apk
-        path: bin/*.apk
+      - name: Run unit tests
+        run: ./gradlew clean testDebug
