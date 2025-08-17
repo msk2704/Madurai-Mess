@@ -9,14 +9,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_HOME: ${{ github.workspace }}/Android/Sdk
+      PATH: ${{ github.workspace }}/Android/Sdk/cmdline-tools/latest/bin:${{ github.workspace }}/Android/Sdk/platform-tools:${{ github.workspace }}/Android/Sdk/build-tools/31.0.0:$PATH
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full clone
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'  # Python 3.10 works best with current Buildozer
+          python-version: '3.10'
 
       - name: Install system dependencies
         run: |
@@ -29,13 +35,23 @@ jobs:
               unzip \
               zlib1g-dev \
               ccache \
-              libncurses-dev  # Use libncurses-dev instead
+              libncurses-dev \
+              wget
 
-      - name: Install Buildozer and tools
+      - name: Install Android SDK command-line tools
+        run: |
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+          unzip cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
+          mkdir -p $ANDROID_HOME/cmdline-tools/latest
+          mv $ANDROID_HOME/cmdline-tools/cmdline-tools/* $ANDROID_HOME/cmdline-tools/latest/
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
+
+      - name: Install Buildozer and Cython
         run: |
           pip install --upgrade pip wheel virtualenv
-          pip install buildozer cython  # Install Cython here
-          buildozer android update
+          pip install buildozer cython
 
       - name: Create required directories
         run: |
@@ -44,12 +60,10 @@ jobs:
           mkdir -p .buildozer/android/platform/build-arm64-v8a
 
       - name: Run Buildozer clean
-        run: |
-          buildozer android clean
+        run: buildozer android clean
 
       - name: Build APK
-        run: |
-          buildozer -v android debug
+        run: buildozer -v android debug
 
       - name: Upload APK artifact
         if: success()
