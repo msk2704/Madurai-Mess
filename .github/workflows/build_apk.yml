@@ -12,11 +12,13 @@ jobs:
       ANDROID_HOME: ${{ github.workspace }}/Android
       PATH: ${{ github.workspace }}/Android/cmdline-tools/latest/bin:${{ github.workspace }}/Android/platform-tools:$PATH
 
-    steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0  # Force full Git clone to avoid tar archive extraction
+  - name: Checkout repo
+  uses: actions/checkout@v3
+  with:
+    fetch-depth: 0       # full clone
+    clean: true          # remove any leftover files
+    lfs: false           # optional, if not using Git LFS
+
 
     - name: Install system dependencies
       run: |
