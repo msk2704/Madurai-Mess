@@ -7,19 +7,18 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04   # Explicit runner version
     env:
       ANDROID_HOME: ${{ github.workspace }}/Android
       PATH: ${{ github.workspace }}/Android/cmdline-tools/latest/bin:${{ github.workspace }}/Android/platform-tools:$PATH
 
-  steps:
-  - name: Checkout repo
-  uses: actions/checkout@v3
-  with:
-    fetch-depth: 0       # full clone
-    clean: true          # remove any leftover files
-    lfs: false           # optional, if not using Git LFS
-
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Full Git clone to avoid tar
+        clean: true     # Remove any leftover files
+        lfs: false
 
     - name: Install system dependencies
       run: |
