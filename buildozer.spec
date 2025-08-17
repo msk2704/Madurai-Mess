@@ -1,31 +1,46 @@
 [app]
+# (str) Title of your application
 title = Madurai Mess
+
+# (str) Package name
 package.name = madurai_mess
+
+# (str) Package domain (reverse domain notation)
 package.domain = org.madurai
+
+# (str) Source code directory
 source.dir = .
+
+# (list) File extensions to include
 source.include_exts = py,png,jpg,kv,atlas
 
+# (str) Application version
+version = 0.69
+
+# (str) Application orientation (portrait/landscape)
 orientation = portrait
+
+# (int) Fullscreen mode (0 = windowed, 1 = fullscreen)
 fullscreen = 0
 
 # App icon and presplash
 icon.filename = assets/madurai_logo.png
 presplash.filename = assets/madurai_logo.png
 
-# Keep only necessary modules for now
+# (list) Python requirements
 requirements = python3,kivy
 
 # Limit to one architecture for faster builds
 android.archs = arm64-v8a
 
-# Python-for-Android settings (these are stable defaults)
+# Android API settings
 android.api = 31
 android.minapi = 21
 android.ndk = 25b
 android.ndk_api = 21
 
-# Helpful for debugging
+# Logging level (0=debug, 1=info, 2=warning, 3=error)
 log_level = 2
 
-# (Optional) If build issues arise, uncomment:
+# (Optional) Uncomment if build issues arise
 # p4a.branch = master
