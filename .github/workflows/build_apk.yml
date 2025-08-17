@@ -34,7 +34,8 @@ jobs:
       - name: Install Buildozer and tools
         run: |
           pip install --upgrade pip wheel virtualenv
-          pip install buildozer
+          pip install buildozer cython  # Install Cython here
+          buildozer init
           buildozer android update
 
       - name: Create required directories
