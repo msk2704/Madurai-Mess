@@ -12,6 +12,7 @@ jobs:
       ANDROID_HOME: ${{ github.workspace }}/Android
       PATH: ${{ github.workspace }}/Android/cmdline-tools/latest/bin:${{ github.workspace }}/Android/platform-tools:$PATH
 
+  steps:
   - name: Checkout repo
   uses: actions/checkout@v3
   with:
